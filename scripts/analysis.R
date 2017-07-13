@@ -5,10 +5,6 @@
 # Logic for active filter
 # 
 # move col clean etc. to functions script
-#
-#
-#
-#
 
 
 
@@ -59,10 +55,10 @@ t_created <- hpsaw %>%
 t_closed <- hpsaw %>% 
   select(category_title, solved_time) %>% 
   mutate(solved_dt = dmy(format(solved_time, '%d/%m/%Y')),
-         solved_tm = format(solved_time, '%H:%M:%S')) %>%  # redundant
+         solved_tm = format(solved_time, '%H:%M:%S')) %>%  # <~ redundant?
   group_by(category_title, solved_dt) %>% 
   summarise(closed = n()) %>%
-  ungroup() %>% 
+  ungroup() %>%                                            # <~ redundant?
   arrange(category_title, solved_dt) %>% 
   print
 
@@ -97,12 +93,13 @@ trend_tbl %<>%
 # <= 3pm, status = active, category = x
 
 
-trend_table = NULL
-for(i in 1:length(date_lab)){
-  for(j in 1:length(emr_cat)){
-    n = n+1
-  }
-  m = m+1
+
+for(i in extract(date_seq)){
+  hpsaw %>% 
+    select(category_title, create_date, solved_time) %>% 
+    mutate(solved_dt = dmy(format(solved_time, '%d/%m/%Y')), 
+           active = if_else(solved_dt > i, 1,0 )) %>%
+    summarise(n())
 }
 
 
@@ -113,10 +110,6 @@ for(i in seq_len(nrow(x))) {
     print(x[i, j])
   }   
 }
-
-
-
-
 
   
   
