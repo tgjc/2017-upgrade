@@ -78,28 +78,23 @@ end_date <- ymd( readline(prompt = "Please enter end date of report (YYYY/MM/DD)
 date_seq <- as_date(start_date:end_date)
 
 trend_tbl <- tibble( dates = rep(date_seq, times = length(category)),
-                     category = rep(category, each = length(date_seq)) ) 
+                     category = rep(category, each = length(date_seq)) ) %>% 
+             print
 
-# populate blank table with new / closed
-
-trend_tbl %<>% left_join(y = dates)
-
-
-# replace NAs with zeros 
-
-trend_tbl %<>%
-
+# populate table with new / closed
+trend_tbl %<>% 
+  left_join(y = t_created, 
+            by = c("dates" = "create_date", "category" = "category_title")) %>% 
+  mutate(created = if_else(is.na(created), as.integer(0),created)) %>% 
+  left_join(y = t_closed, 
+            by = c("dates" = "solved_dt", "category" = "category_title")) %>% 
+  mutate(closed = if_else(is.na(closed), as.integer(0),closed)) %>% 
+  print
 
 # create active column
 
-trend_tbl %<>%
-  group_by(dates) %>%
-  mutate(active = sum( )) # if_else
-
-
-
-
-
+# created before 5pm, status = active or solved date < i 
+# <= 3pm, status = active, category = x
 
 
 trend_table = NULL
@@ -120,19 +115,8 @@ for(i in seq_len(nrow(x))) {
 }
 
 
-# Active:
-# created before 5pm, status = active, 
-
-# <= 3pm, status = active, category = x
 
 
-# 1. create vector of date cols from start of report to today()-1
-
-# 2. t_create <- 
-  
-# 3. 
-
-# 4. left join 
 
   
   
