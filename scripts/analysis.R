@@ -25,6 +25,7 @@ hpsaw <- read_excel(path = "data/hpsaw_test_excel.xlsx",
   select(id:title, priority, name_name,job_title:incident_location_name,
          status:category_title, current_assignment_name:completion_code,
          creation_time:last_update_time, solved_time) %>%
+  rename(category = category_title)
   mutate(create_date = dmy(format(creation_time, '%d/%m/%Y')),
          create_time = format(creation_time, '%H:%M:%S'),
          solved_dt = dmy(format(solved_time, '%d/%m/%Y')),
@@ -36,28 +37,28 @@ hpsaw <- read_excel(path = "data/hpsaw_test_excel.xlsx",
 
 # New incidents 
 t_created <- hpsaw %>% 
-  select(create_date, category_title, solved_time) %>% 
-  group_by(category_title, create_date) %>%
+  select(create_date, category, solved_time) %>% 
+  group_by(category, create_date) %>%
   summarise(created = n() ) %>% 
   ungroup() %>% 
-  arrange(category_title, create_date) %>%  # redundant?
+  arrange(category, create_date) %>%  # redundant?
   print
 
 # Closed incidents
 t_closed <- hpsaw %>% 
-  select(category_title, solved_time) %>% 
+  select(category, solved_time) %>% 
   mutate(solved_dt = dmy(format(solved_time, '%d/%m/%Y')),
          solved_tm = format(solved_time, '%H:%M:%S')) %>%  # <~ redundant?
-  group_by(category_title, solved_dt) %>% 
+  group_by(category, solved_dt) %>% 
   summarise(closed = n()) %>%
   ungroup() %>%                                            # <~ redundant?
-  arrange(category_title, solved_dt) %>% 
+  arrange(category, solved_dt) %>% 
   print
 
 
 # Create blank trend table
-category <- hpsaw %>%
-  select(category_title) %>%
+category_list <- hpsaw %>%
+  select(category) %>%
   distinct() %>%
   extract2(1)
   
@@ -65,17 +66,17 @@ start_date <- ymd( readline(prompt = "Please enter start date of report (YYYY/MM
 end_date <- ymd( readline(prompt = "Please enter end date of report (YYYY/MM/DD): ") )
 date_seq <- as_date(start_date:end_date)
 
-trend_tbl <- tibble( dates = rep(date_seq, times = length(category)),
-                     category = rep(category, each = length(date_seq)) ) %>% 
+trend_tbl <- tibble( dates = rep(date_seq, times = length(category_list)),
+                     category = rep(category_list, each = length(date_seq)) ) %>% 
              print
 
 # populate table with new / closed
 trend_tbl %<>% 
   left_join(y = t_created, 
-            by = c("dates" = "create_date", "category" = "category_title")) %>% 
+            by = c("dates" = "create_date", "category" = "category")) %>% 
   mutate(created = if_else(is.na(created), as.integer(0),created)) %>% 
   left_join(y = t_closed, 
-            by = c("dates" = "solved_dt", "category" = "category_title")) %>% 
+            by = c("dates" = "solved_dt", "category" = "category")) %>% 
   mutate(closed = if_else(is.na(closed), as.integer(0),closed)) %>% 
   print
 
@@ -84,12 +85,14 @@ trend_tbl %<>%
 # created before 5pm, status = active or solved date < i 
 # <= 3pm, status = active, category = x
 
-
+t_active <- tibble(dates = character(), 
+                   category = character(), 
+                   active = double())
 
 for(i in extract(date_seq)){
   hpsaw %>% 
-    select(category_title, status, create_date, solved_dt) %>% 
-    group_by(category_title) %>% 
+    select(category, status, create_date, solved_dt) %>% 
+    group_by(category) %>% 
     mutate(
       active = case_when(
         is.na(solved_dt) ~ 1,
@@ -100,6 +103,7 @@ for(i in extract(date_seq)){
     ) %>%
     summarise(active = sum(active)) %>%
     mutate(dates = as.Date(i, origin = "1970-01-01")) %>% 
+    bind_rows(t_active) %>% 
     print
 }
 
