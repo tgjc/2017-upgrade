@@ -1,15 +1,5 @@
 
 
-# TO DO::
-# for loop active filterd
-# Logic for active filter
-# 
-# move col clean etc. to functions script
-
-
-
-
-
 # Set-up and read data
 #------------------------------------------------------------------------------------------
 
@@ -98,20 +88,21 @@ trend_tbl %<>%
 
 for(i in extract(date_seq)){
   hpsaw %>% 
-    select(category_title, create_date, solved_time) %>% 
-    mutate(solved_dt = dmy(format(solved_time, '%d/%m/%Y')), 
-           active = if_else(solved_dt > i, 1,0 )) %>%
-    summarise(n())
+    select(category_title, status, create_date, solved_dt) %>% 
+    group_by(category_title) %>% 
+    mutate(
+      active = case_when(
+        is.na(solved_dt) ~ 1,
+        tolower(status) == "active" ~ 1,
+        i < solved_dt ~ 1,
+        TRUE ~ 0
+      )
+    ) %>%
+    summarise(active = sum(active)) %>%
+    mutate(dates = as.Date(i, origin = "1970-01-01")) %>% 
+    print
 }
 
-
-x <- matrix(1:6, 2, 3)
-
-for(i in seq_len(nrow(x))) {
-  for(j in seq_len(ncol(x))) {
-    print(x[i, j])
-  }   
-}
 
   
   

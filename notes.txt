@@ -1,13 +1,2 @@
-Active:
-created before 5pm, status = active, 
-
-<= 3pm, status = active, category = x
-
-
-1. create vector of date cols from start of report to today()-1
-
-2. t_create <- 
-
-3. 
-
-4. left join 
+To Do:
+# move col clean etc. to functions script
