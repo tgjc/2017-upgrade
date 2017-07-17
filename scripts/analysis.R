@@ -25,7 +25,7 @@ hpsaw <- read_excel(path = "data/hpsaw_test_excel.xlsx",
   select(id:title, priority, name_name,job_title:incident_location_name,
          status:category_title, current_assignment_name:completion_code,
          creation_time:last_update_time, solved_time) %>%
-  rename(category = category_title)
+  rename(category = category_title) %>% 
   mutate(create_date = dmy(format(creation_time, '%d/%m/%Y')),
          create_time = format(creation_time, '%H:%M:%S'),
          solved_dt = dmy(format(solved_time, '%d/%m/%Y')),
@@ -90,14 +90,13 @@ t_active <- tibble(dates = character(),
                    active = double())
 
 for(i in extract(date_seq)){
-  hpsaw %>% 
+  t_active <- hpsaw %>% 
     select(category, status, create_date, solved_dt) %>% 
     group_by(category) %>% 
     mutate(
       active = case_when(
-        is.na(solved_dt) ~ 1,
-        tolower(status) == "active" ~ 1,
-        i < solved_dt ~ 1,
+        is.na(solved_dt) & i <= create_date ~ 1,
+        create_date <= i & i < solved_dt ~ 1,
         TRUE ~ 0
       )
     ) %>%

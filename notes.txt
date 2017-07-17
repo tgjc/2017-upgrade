@@ -1,2 +1,5 @@
 To Do:
 # move col clean etc. to functions script
+# fix logic in active for loop
+
+https://stackoverflow.com/questions/45114727/r-install-packages-error
