@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------------------
 
 # Install / load packages
-list_of_packages <- c("tidyverse", "readxl", "stringr", "magrittr", "lubridate")
+list_of_packages <- c("tidyverse", "readxl", "stringr", "magrittr", "lubridate", "read_xl")
 new_packages <- list_of_packages[!(list_of_packages %in% installed.packages()[,"Package"])]
 
 if(length(new_packages)) install.packages(new_packages)
@@ -36,7 +36,9 @@ hpsaw <- read_excel(path = "data/hpsaw_test_excel.xlsx",
          status:category_title, current_assignment_name:completion_code,
          creation_time:last_update_time, solved_time) %>%
   mutate(create_date = dmy(format(creation_time, '%d/%m/%Y')),
-         create_time = format(creation_time, '%H:%M:%S'))  # can this be moved to t_created? or other way round?
+         create_time = format(creation_time, '%H:%M:%S'),
+         solved_dt = dmy(format(solved_time, '%d/%m/%Y')),
+         solved_tm = format(solved_time, '%H:%M:%S'))
 
 #------------------------------------------------------------------------------------------
 # create / closed / active trend
