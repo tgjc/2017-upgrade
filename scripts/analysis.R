@@ -1,10 +1,10 @@
 
-
+#------------------------------------------------------------------------------------------
 # Set-up and read data
 #------------------------------------------------------------------------------------------
 
 # Install / load packages
-list_of_packages <- c("tidyverse", "readxl", "stringr", "magrittr", "lubridate", "read_xl")
+list_of_packages <- c("tidyverse", "readxl", "stringr", "magrittr", "lubridate", "ggplot2")
 new_packages <- list_of_packages[!(list_of_packages %in% installed.packages()[,"Package"])]
 
 if(length(new_packages)) install.packages(new_packages)
@@ -19,8 +19,9 @@ col_clean <- function(x){
 }
 
 # Read data, clean col names and split creation time into date/time cols
-hpsaw <- read_excel(path = "data/hpsaw_test_excel.xlsx",
-                    sheet = "Incident List") %>%
+hpsaw_extract <- 
+  read_excel(path = "data/hpsaw-extract.xlsx",
+             sheet = "Incident List") %>%
   col_clean() %>% 
   select(id:title, priority, name_name,job_title:incident_location_name,
          status:category_title, current_assignment_name:completion_code,
@@ -30,6 +31,23 @@ hpsaw <- read_excel(path = "data/hpsaw_test_excel.xlsx",
          create_time = format(creation_time, '%H:%M:%S'),
          solved_dt = dmy(format(solved_time, '%d/%m/%Y')),
          solved_tm = format(solved_time, '%H:%M:%S'))
+
+hpsaw_active_extract <- 
+  read_excel(path = "data/hpsaw-active-extract.xlsx",
+             sheet = "Incident List") %>%
+  col_clean() %>% 
+  select(id:title, priority, name_name,job_title:incident_location_name,
+         status:category_title, current_assignment_name:completion_code,
+         creation_time:last_update_time, solved_time) %>%
+  rename(category = category_title) %>% 
+  mutate(create_date = dmy(format(creation_time, '%d/%m/%Y')),
+         create_time = format(creation_time, '%H:%M:%S'))
+
+## test for duplicates in report:
+## hpsaw <- semi_join(hpsaw_active_extract, hpsaw_extract, by = "id")
+
+hpsaw <- bind_rows(hpsaw_active_extract, hpsaw_extract)
+
 
 #------------------------------------------------------------------------------------------
 # create / closed / active trend
@@ -81,10 +99,6 @@ trend_tbl %<>%
   print
 
 # create active column
-
-# created before 5pm, status = active or solved date < i 
-# <= 3pm, status = active, category = x
-
 t_active <- tibble(dates = character(), 
                    category = character(), 
                    active = double())
@@ -102,10 +116,10 @@ for(i in extract(date_seq)){
     ) %>%
     summarise(active = sum(active)) %>%
     mutate(dates = as.Date(i, origin = "1970-01-01")) %>% 
-    bind_rows(t_active) %>% 
-    print
+    bind_rows(t_active)
 }
 
+# Join active to trend table
 
   
   

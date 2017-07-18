@@ -1,5 +1,10 @@
 To Do:
 # move col clean etc. to functions script
-# fix logic in active for loop
+# review logic in active for loop - add 9am/5pm condition
+# create second report for all active tickets and join to created by xx date report
+# change date_seq to today() -1 ??
+# problem in active relates to solved_time in hpsaw_active_extract parsing as lgl
 
 https://stackoverflow.com/questions/45114727/r-install-packages-error
+
+options(repos = getOption("repos")["CRAN"])
