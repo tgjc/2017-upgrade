@@ -108,7 +108,7 @@ for(i in extract(date_seq)){
   t_active <- hpsaw %>% 
     select(category, status, create_date, solved_dt) %>% 
     group_by(category) %>% 
-    mutate(active = case_when(is.na(solved_dt) & i <= create_date ~ 1,
+    mutate(active = case_when(create_date <= i & is.na(solved_dt) ~ 1,
                               create_date <= i & i < solved_dt ~ 1,
                               TRUE ~ 0) ) %>% 
     summarise(active = sum(active)) %>%
