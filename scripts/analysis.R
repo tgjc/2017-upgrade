@@ -41,7 +41,8 @@ hpsaw_active_extract <-
          creation_time:last_update_time, solved_time) %>%
   rename(category = category_title) %>% 
   mutate(create_date = dmy(format(creation_time, '%d/%m/%Y')),
-         create_time = format(creation_time, '%H:%M:%S'))
+         create_time = format(creation_time, '%H:%M:%S'),
+         solved_time = as.POSIXct(solved_time))
 
 ## test for duplicates in report:
 ## hpsaw <- semi_join(hpsaw_active_extract, hpsaw_extract, by = "id")
@@ -99,7 +100,7 @@ trend_tbl %<>%
   print
 
 # create active column
-t_active <- tibble(dates = character(), 
+t_active <- tibble(dates = as.character(), 
                    category = character(), 
                    active = double())
 
@@ -120,6 +121,8 @@ for(i in extract(date_seq)){
 }
 
 # Join active to trend table
+trend_tbl %<>% 
+  left_join(t_active, by = c("dates", "category"))
 
-  
+trend_tbl %>% group_by(dates) %>% summarise( total_active = sum(active))
   
