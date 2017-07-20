@@ -108,13 +108,9 @@ for(i in extract(date_seq)){
   t_active <- hpsaw %>% 
     select(category, status, create_date, solved_dt) %>% 
     group_by(category) %>% 
-    mutate(
-      active = case_when(
-        is.na(solved_dt) & i <= create_date ~ 1,
-        create_date <= i & i < solved_dt ~ 1,
-        TRUE ~ 0
-      )
-    ) %>%
+    mutate(active = case_when(is.na(solved_dt) & i <= create_date ~ 1,
+                              create_date <= i & i < solved_dt ~ 1,
+                              TRUE ~ 0) ) %>% 
     summarise(active = sum(active)) %>%
     mutate(dates = as.Date(i, origin = "1970-01-01")) %>% 
     bind_rows(t_active)
@@ -124,5 +120,12 @@ for(i in extract(date_seq)){
 trend_tbl %<>% 
   left_join(t_active, by = c("dates", "category"))
 
-trend_tbl %>% group_by(dates) %>% summarise( total_active = sum(active))
+trend_by_day <- 
+  trend_tbl %>%  
+  group_by(dates) %>% 
+  summarise(sum_created = sum(created),
+            sum_closed = sum(closed), 
+            sum_active = sum(active)) %>% 
+  print
+
   
