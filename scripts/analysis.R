@@ -121,11 +121,13 @@ trend_tbl %<>%
   left_join(t_active, by = c("dates", "category"))
 
 trend_by_day <- 
-  trend_tbl %>%  
+  trend_tbl %>%
+  select(dates:active) %>% 
   group_by(dates) %>% 
-  summarise(sum_created = sum(created),
-            sum_closed = sum(closed), 
-            sum_active = sum(active)) %>% 
+  summarise(created = sum(created),
+            closed = sum(closed),
+            active = sum(active)) %>% 
+  gather(created, closed, active, key = count, value = value) %>% 
   print
 
   
