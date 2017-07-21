@@ -54,7 +54,7 @@ hpsaw <- bind_rows(hpsaw_active_extract, hpsaw_extract)
 # create / closed / active trend
 #------------------------------------------------------------------------------------------
 
-# New incidents 
+# Created incidents 
 t_created <- hpsaw %>% 
   select(create_date, category, solved_time) %>% 
   group_by(category, create_date) %>%
@@ -89,7 +89,7 @@ trend_tbl <- tibble( dates = rep(date_seq, times = length(category_list)),
                      category = rep(category_list, each = length(date_seq)) ) %>% 
              print
 
-# populate table with new / closed
+# populate table with created / closed
 trend_tbl %<>% 
   left_join(y = t_created, 
             by = c("dates" = "create_date", "category" = "category")) %>% 
@@ -120,14 +120,30 @@ for(i in extract(date_seq)){
 trend_tbl %<>% 
   left_join(t_active, by = c("dates", "category"))
 
-trend_by_day <- 
+# roll up by day
+by_day_trend <- 
   trend_tbl %>%
   select(dates:active) %>% 
   group_by(dates) %>% 
   summarise(created = sum(created),
             closed = sum(closed),
             active = sum(active)) %>% 
-  gather(created, closed, active, key = count, value = value) %>% 
   print
 
-  
+# Seperate active from created/closed for plotting
+by_day_open_closed <- 
+  trend_tbl %>%
+  select(dates:active) %>% 
+  group_by(dates) %>% 
+  summarise(created = sum(created),
+            closed = sum(closed)) %>% 
+  gather(created, closed, key = count, value = value)
+
+by_day_active <- 
+  trend_tbl %>%
+  select(dates:category, active) %>% 
+  group_by(dates) %>% 
+  summarise(active = sum(active)) 
+
+
+
