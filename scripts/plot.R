@@ -10,7 +10,8 @@ t + geom_bar(data = filter(trend_by_day, count != "active"),
   geom_line(data = filter(trend_by_day, count == "active"), size = .75, color = "grey39") +
   geom_point(data = filter(trend_by_day, count == "active"), size = 1.5, color = "grey39") +
   labs(x = "week begining", y = "count", title = "Total Incidents Trend") +
-  theme(plot.title = element_text(hjust = 0.5)) 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_text(aes(label = value, y = value + .2), position = position_dodge(.9), vjust = 0)
 
 
 https://stackoverflow.com/questions/18158461/grouped-bar-plot-in-ggplot
