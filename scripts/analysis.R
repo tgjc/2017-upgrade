@@ -128,10 +128,11 @@ trend_by_day <-
   summarise(created = sum(created),
             closed = sum(closed),
             active = sum(active)) %>% 
+  gather(created, closed, active, key = count, value = value) %>% 
   print
 
 # Seperate active from created/closed for plotting
-by_day_open_closed <- 
+tickets_by_day <- 
   trend_tbl %>%
   select(dates:active) %>% 
   group_by(dates) %>% 
@@ -139,7 +140,7 @@ by_day_open_closed <-
             closed = sum(closed)) %>% 
   gather(created, closed, key = count, value = value)
 
-by_day_active <- 
+active_by_day <- 
   trend_tbl %>%
   select(dates:category, active) %>% 
   group_by(dates) %>% 

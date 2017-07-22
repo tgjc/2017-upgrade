@@ -1,12 +1,16 @@
 
 # Plot trend created, closed + active trend line
-t_bar <- by_day_open_closed %>% ggplot(., aes(dates, value))
-t_bar + geom_bar(aes(fill = count), position = "dodge", stat = "identity")
+t <- ggplot(data = trend_by_day, aes(dates, value))
 
-
-
-t + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-t + theme(axis.text.x = element_text())
+t + geom_bar(data = filter(trend_by_day, count != "active"),
+             aes(fill = count), 
+             position = "dodge", 
+             stat = "identity", 
+             width = .8) + 
+  geom_line(data = filter(trend_by_day, count == "active"), size = .75, color = "grey39") +
+  geom_point(data = filter(trend_by_day, count == "active"), size = 1.5, color = "grey39") +
+  labs(x = "week begining", y = "count", title = "Total Incidents Trend") +
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 
 https://stackoverflow.com/questions/18158461/grouped-bar-plot-in-ggplot
