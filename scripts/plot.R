@@ -1,6 +1,7 @@
-# Plot trend line
-t_bar <- ggplot(by_day_open_closed, aes(dates, value))
-t + geom_bar(aes(fill = ), position = "dodge", stat="identity")
+
+# Plot trend created, closed + active trend line
+t_bar <- by_day_open_closed %>% ggplot(., aes(dates, value))
+t_bar + geom_bar(aes(fill = count), position = "dodge", stat = "identity")
 
 
 
@@ -12,3 +13,6 @@ https://stackoverflow.com/questions/18158461/grouped-bar-plot-in-ggplot
 http://ggplot2.tidyverse.org/reference/position_dodge.html
 https://stackoverflow.com/questions/10327267/annotation-above-bars?noredirect=1&lq=1
 https://stackoverflow.com/questions/40048002/represent-geom-line-and-geom-bar-in-the-same-plot
+
+
+

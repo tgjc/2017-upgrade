@@ -120,8 +120,8 @@ for(i in extract(date_seq)){
 trend_tbl %<>% 
   left_join(t_active, by = c("dates", "category"))
 
-# roll up by day
-by_day_trend <- 
+# Summarise by day
+trend_by_day <- 
   trend_tbl %>%
   select(dates:active) %>% 
   group_by(dates) %>% 
