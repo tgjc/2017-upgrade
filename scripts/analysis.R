@@ -131,7 +131,44 @@ trend_by_day <-
   gather(created, closed, active, key = count, value = value) %>% 
   print
 
+# Plot trend created, closed + active trend line
+t <- ggplot(data = trend_by_day, aes(dates, value, group = count))
+
+t + geom_col(data = filter(trend_by_day, count != "active"), aes(fill = count), position_dodge(.6)) +
+  geom_text(data = filter(trend_by_day,count != "active", value > 0), 
+            aes(label = value, y = value + 0.3), 
+            position = position_dodge(1), vjust = 0, size = 3) + 
+  geom_line(data = filter(trend_by_day, count == "active"), size = .75, color = "grey39") +
+  geom_text(data = filter(trend_by_day,count == "active"), aes(label = value, y = value + 1.5), size = 3) +
+  geom_point(data = filter(trend_by_day, count == "active"), size = 1.5, color = "grey39") +
+  labs(x = "Week Begining", y = "Total", title = "Active Incidents Trend") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_minimal() + 
+  guides(fill = guide_legend(title = "Legend"))
+  
 
 
+#------------------------------------------------------------------------------------------
+# Active Summaries
+#------------------------------------------------------------------------------------------
 
+# data for active summaries
+active_sum <- hpsaw %>% 
+  select(category, priority, status, create_date) %>% 
+  filter(status == "Active")  # <~ need to add create_date >= 2017-07-22
+
+# Active incidents by priority
+by_priority <- ggplot(active_sum, aes(priority)) +
+  geom_bar(fill = "royalblue") + 
+  geom_text(stat='count',aes(label=..count..),vjust=-1) +
+  labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
+  theme(plot.title = element_text(hjust = "centre")) +
+  theme_minimal()
+
+# Active incidents by category
+by_impact <- ggplot(active_sum, aes(priority)) +
+  geom_bar(fill = "royalblue") + 
+  labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_minimal()
 
