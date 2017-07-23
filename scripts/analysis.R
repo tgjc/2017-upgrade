@@ -162,13 +162,15 @@ by_priority <- ggplot(active_sum, aes(priority)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count',aes(label=..count..),vjust=-1) +
   labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
-  theme(plot.title = element_text(hjust = "centre")) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   theme_minimal()
 
 # Active incidents by category
-by_impact <- ggplot(active_sum, aes(priority)) +
-  geom_bar(fill = "royalblue") + 
-  labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
+by_impact <- ggplot(active_sum, aes(category)) +
+  geom_bar(aes(fill = priority)) + 
+  geom_text(stat = 'count', aes(label = ..count..), vjust=-1) +
+  labs(x = "Category", y = "Total", title = "Active Cases by Category") + 
   theme(plot.title = element_text(hjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   theme_minimal()
 
