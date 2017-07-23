@@ -138,8 +138,8 @@ t + geom_col(data = filter(trend_by_day, count != "active"), aes(fill = count), 
   geom_text(data = filter(trend_by_day,count == "active"), aes(label = value, y = value + 1.5), size = 3) +
   geom_point(data = filter(trend_by_day, count == "active"), size = 1.5, color = "grey39") +
   labs(x = "Week Begining", y = "Total", title = "Active Incidents Trend") +
-  theme(plot.title = element_text(hjust = 0.5)) +
   theme_minimal() + 
+  theme(plot.title = element_text(hjust = 0.5)) +
   guides(fill = guide_legend(title = "Legend"))
   
 
@@ -158,6 +158,7 @@ by_priority <- ggplot(active_sum, aes(priority)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count',aes(label=..count..),vjust=-1) +
   labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
+  theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 
 # Active incidents by category
@@ -165,6 +166,8 @@ by_category <- ggplot(active_sum, aes(category)) +
   geom_bar(aes(fill = priority)) + 
   geom_text(stat = 'count', aes(label = ..count..), vjust=-1) +
   labs(x = "Category", y = "Total", title = "Active Cases by Category") + 
+  theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggplot2::ylim(0,20)
 
