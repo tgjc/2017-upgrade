@@ -60,8 +60,7 @@ t_created <- hpsaw %>%
   group_by(category, create_date) %>%
   summarise(created = n() ) %>% 
   ungroup() %>% 
-  arrange(category, create_date) %>%  # redundant?
-  print
+  arrange(category, create_date)  # redundant?
 
 # Closed incidents
 t_closed <- hpsaw %>% 
@@ -71,8 +70,7 @@ t_closed <- hpsaw %>%
   group_by(category, solved_dt) %>% 
   summarise(closed = n()) %>%
   ungroup() %>%                                            # <~ redundant?
-  arrange(category, solved_dt) %>% 
-  print
+  arrange(category, solved_dt) 
 
 
 # Create blank trend table
@@ -86,8 +84,7 @@ end_date <- ymd( readline(prompt = "Please enter end date of report (YYYY/MM/DD)
 date_seq <- as_date(start_date:end_date)
 
 trend_tbl <- tibble( dates = rep(date_seq, times = length(category_list)),
-                     category = rep(category_list, each = length(date_seq)) ) %>% 
-             print
+                     category = rep(category_list, each = length(date_seq)) )
 
 # populate table with created / closed
 trend_tbl %<>% 
@@ -96,8 +93,7 @@ trend_tbl %<>%
   mutate(created = if_else(is.na(created), as.integer(0),created)) %>% 
   left_join(y = t_closed, 
             by = c("dates" = "solved_dt", "category" = "category")) %>% 
-  mutate(closed = if_else(is.na(closed), as.integer(0),closed)) %>% 
-  print
+  mutate(closed = if_else(is.na(closed), as.integer(0),closed))
 
 # create active column
 t_active <- tibble(dates = as.character(), 
@@ -162,15 +158,13 @@ by_priority <- ggplot(active_sum, aes(priority)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count',aes(label=..count..),vjust=-1) +
   labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme_minimal()
+  theme(plot.title = element_text(hjust = 0.5))
 
 # Active incidents by category
-by_impact <- ggplot(active_sum, aes(category)) +
+by_category <- ggplot(active_sum, aes(category)) +
   geom_bar(aes(fill = priority)) + 
   geom_text(stat = 'count', aes(label = ..count..), vjust=-1) +
   labs(x = "Category", y = "Total", title = "Active Cases by Category") + 
   theme(plot.title = element_text(hjust = 0.5)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme_minimal()
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 
