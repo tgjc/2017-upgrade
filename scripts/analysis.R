@@ -150,7 +150,7 @@ t + geom_col(data = filter(trend_by_day, count != "active"), aes(fill = count), 
 
 # data for active summaries
 active_sum <- hpsaw %>% 
-  select(category, priority, status, create_date) %>% 
+  select(category, priority, impact, status, create_date) %>% 
   filter(status == "Active")  # <~ need to add create_date >= 2017-07-22
 
 # Active incidents by priority
@@ -171,3 +171,11 @@ by_category <- ggplot(active_sum, aes(category)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggplot2::ylim(0,20)
 
+# Active incidents by impact
+by_impact <- ggplot(active_sum, aes(impact)) +
+  geom_bar(fill = "royalblue") + 
+  geom_text(stat='count',aes(label=..count..),vjust=-1) +
+  labs(x = "Impact", y = "Total", title = "Active Cases by Impact") + 
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  ylim(0, 70)
