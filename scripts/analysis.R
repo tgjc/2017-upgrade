@@ -4,12 +4,12 @@
 #------------------------------------------------------------------------------------------
 
 # Install / load packages
-list_of_packages <- c("tidyverse", "readxl", "stringr", "magrittr", "lubridate", "ggplot2")
-new_packages <- list_of_packages[!(list_of_packages %in% installed.packages()[,"Package"])]
+# list_of_packages <- c("tidyverse", "readxl", "stringr", "magrittr", "lubridate", "ggplot2")
+# new_packages <- list_of_packages[!(list_of_packages %in% installed.packages()[,"Package"])]
 
-if(length(new_packages)) install.packages(new_packages)
+# if(length(new_packages)) install.packages(new_packages)
 
-lapply(X = list_of_packages, FUN = require, character.only = TRUE)
+# lapply(X = list_of_packages, FUN = require, character.only = TRUE)
 
 library(dplyr)
 library(tidyr)
@@ -136,9 +136,8 @@ trend_by_day <-
   print
 
 # Plot trend created, closed + active trend line
-t <- ggplot(data = trend_by_day, aes(dates, value, group = count))
-
-t + geom_col(data = filter(trend_by_day, count != "active"), aes(fill = count), position_dodge(.6)) +
+t <- ggplot(data = trend_by_day, aes(dates, value, group = count)) +
+  geom_col(data = filter(trend_by_day, count != "active"), aes(fill = count), position_dodge(.6)) +
   geom_text(data = filter(trend_by_day,count != "active", value > 0), 
             aes(label = value, y = value + 0.3), 
             position = position_dodge(1), vjust = 0, size = 3) + 
@@ -197,4 +196,10 @@ by_location <- ggplot(active_sum, aes(incident_location_name)) +
   coord_flip() +
   theme_minimal() + 
   theme(plot.title = element_text(hjust = 0.5)) 
+
+# Tidy environment
+rm(list=c("hpsaw_active_extract", "hpsaw_extract", "t_active", "t_closed", 
+          "t_created", "trend_by_day", "trend_tbl"))
+
+rm(list=c("category_list", "date_seq", "start_date", "end_date" , "i"))
   
