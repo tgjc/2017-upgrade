@@ -132,17 +132,16 @@ trend_by_day <-
   summarise(created = sum(created),
             closed = sum(closed),
             active = sum(active)) %>% 
-  gather(created, closed, active, key = count, value = value) %>% 
-  print
+  gather(created, closed, active, key = count, value = value)
 
 # Plot trend created, closed + active trend line
 t <- ggplot(data = trend_by_day, aes(dates, value, group = count)) +
   geom_col(data = filter(trend_by_day, count != "active"), aes(fill = count), position_dodge(.6)) +
   geom_text(data = filter(trend_by_day,count != "active", value > 0), 
             aes(label = value, y = value + 0.3), 
-            position = position_dodge(1), vjust = 0, size = 3) + 
+            position = position_dodge(1), vjust = 0, size = 2.5) + 
   geom_line(data = filter(trend_by_day, count == "active"), size = .75, color = "grey39") +
-  geom_text(data = filter(trend_by_day,count == "active"), aes(label = value, y = value + 1.5), size = 3) +
+  geom_text(data = filter(trend_by_day,count == "active"), aes(label = value, y = value + 3), size = 3) +
   geom_point(data = filter(trend_by_day, count == "active"), size = 1.5, color = "grey39") +
   labs(x = "Week Begining", y = "Total", title = "Active Incidents Trend") +
   theme_minimal() + 
@@ -199,7 +198,7 @@ by_location <- ggplot(active_sum, aes(incident_location_name)) +
 
 # Tidy environment
 rm(list=c("hpsaw_active_extract", "hpsaw_extract", "t_active", "t_closed", 
-          "t_created", "trend_by_day", "trend_tbl"))
+          "t_created", "trend_tbl"))
 
 rm(list=c("category_list", "date_seq", "start_date", "end_date" , "i"))
   
