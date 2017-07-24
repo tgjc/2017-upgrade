@@ -189,3 +189,12 @@ by_impact <- ggplot(active_sum, aes(impact)) +
   theme(plot.title = element_text(hjust = 0.5)) + 
   ylim(0, 7)
 
+# Active incidents by location
+by_location <- ggplot(active_sum, aes(incident_location_name)) +
+  geom_bar(fill = "royalblue") + 
+  geom_text(stat='count', aes(label=..count..),hjust=-1) + 
+  labs(x = "", y = "Total", title = "Active Cases by Location") + 
+  coord_flip() +
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust = 0.5)) 
+  
