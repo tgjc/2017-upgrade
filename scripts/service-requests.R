@@ -72,7 +72,6 @@ sr_category_list <- sr_hpsaw %>%
   distinct() %>%
   extract2(1)
 
-# ask user for start end dates for table
 start_date <- ymd( readline(prompt = "Please enter start date of report (YYYY/MM/DD): ") )
 end_date <- ymd( readline(prompt = "Please enter end date of report (YYYY/MM/DD): ") )
 date_seq <- as_date(start_date:end_date)
@@ -136,15 +135,15 @@ sr_t <- ggplot(data = sr_trend_by_day, aes(dates, value, group = count)) +
 
 
 #------------------------------------------------------------------------------------------
-# Active Summaries - Service Request extracts currently missing 
+# Active Summaries
 #------------------------------------------------------------------------------------------
 
-## data for active summaries
+# data for active summaries
 # sr_active_sum <- sr_hpsaw %>% 
 #  select(category, priority, status, create_date) %>% 
-#  filter(status == "Active", create_date >= "2017-07-22")  
+#  filter(status == "Active", create_date >= "2017-07-22")  # <~ need to add create_date >= 2017-07-22
 
-## Active incidents by priority
+# Active incidents by priority
 # sr_by_priority <- ggplot(sr_active_sum, aes(priority)) +
 #  geom_bar(fill = "royalblue") + 
 #  geom_text(stat='count',aes(label=..count..),vjust=-1) +

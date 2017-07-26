@@ -28,7 +28,7 @@ col_clean <- function(x){
 
 # Read data, clean col names and split creation time into date/time cols
 hpsaw_extract <- 
-  read_excel(path = "data/hpsaw-extract-2017.07.24.xlsx",
+  read_excel(path = "data/hpsaw-extract-2017.07.25.xlsx",
              sheet = "Incident List") %>%
   col_clean() %>% 
   select(id:title, priority, name_name,job_title:incident_location_name,
@@ -41,7 +41,7 @@ hpsaw_extract <-
          solved_tm = format(solved_time, '%H:%M:%S'))
 
 hpsaw_active_extract <- 
-  read_excel(path = "data/hpsaw-active-extract-2017.07.24.xlsx",
+  read_excel(path = "data/hpsaw-active-extract-2017.07.25.xlsx",
              sheet = "Incident List") %>%
   col_clean() %>% 
   select(id:title, priority, name_name,job_title:incident_location_name,
@@ -86,7 +86,8 @@ category_list <- hpsaw %>%
   select(category) %>%
   distinct() %>%
   extract2(1)
-  
+
+# ask user for start end dates for table
 start_date <- ymd( readline(prompt = "Please enter start date of report (YYYY/MM/DD): ") )
 end_date <- ymd( readline(prompt = "Please enter end date of report (YYYY/MM/DD): ") )
 date_seq <- as_date(start_date:end_date)
@@ -165,7 +166,8 @@ by_priority <- ggplot(active_sum, aes(priority)) +
   geom_text(stat='count',aes(label=..count..),vjust=-1) +
   labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylim(0,15)
   
 
 # Active incidents by category
