@@ -21,7 +21,7 @@ col_clean <- function(x){
 
 # Read data, clean col names and split creation time into date/time cols
 sr_extract <- 
-  read_excel(path = "data/sr-hpsaw-extract-2017.07.25.xlsx",
+  read_excel(path = "data/sr-extract.xlsx",
              sheet = "Request List") %>%
   col_clean() %>% 
   mutate(create_date = dmy(format(created_time, '%d/%m/%Y')),
@@ -30,7 +30,7 @@ sr_extract <-
          solved_tm = format(closed_time, '%H:%M:%S'))
 
 sr_active_extract <- 
-  read_excel(path = "data/sr-hpsaw-active-extract-2017.07.25.xlsx",
+  read_excel(path = "data/sr-active-extract.xlsx",
              sheet = "Request List") %>%
   col_clean() %>% 
   mutate(create_date = dmy(format(created_time, '%d/%m/%Y')),

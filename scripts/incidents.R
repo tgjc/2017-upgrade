@@ -3,14 +3,6 @@
 # Set-up and read data
 #------------------------------------------------------------------------------------------
 
-# Install / load packages
-# list_of_packages <- c("tidyverse", "readxl", "stringr", "magrittr", "lubridate", "ggplot2")
-# new_packages <- list_of_packages[!(list_of_packages %in% installed.packages()[,"Package"])]
-
-# if(length(new_packages)) install.packages(new_packages)
-
-# lapply(X = list_of_packages, FUN = require, character.only = TRUE)
-
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -28,7 +20,7 @@ col_clean <- function(x){
 
 # Read data, clean col names and split creation time into date/time cols
 hpsaw_extract <- 
-  read_excel(path = "data/hpsaw-extract-2017.07.25.xlsx",
+  read_excel(path = "data/extract.xlsx",
              sheet = "Incident List") %>%
   col_clean() %>% 
   select(id:title, priority, name_name,job_title:incident_location_name,
@@ -41,7 +33,7 @@ hpsaw_extract <-
          solved_tm = format(solved_time, '%H:%M:%S'))
 
 hpsaw_active_extract <- 
-  read_excel(path = "data/hpsaw-active-extract-2017.07.25.xlsx",
+  read_excel(path = "data/active-extract.xlsx",
              sheet = "Incident List") %>%
   col_clean() %>% 
   select(id:title, priority, name_name,job_title:incident_location_name,
@@ -109,6 +101,10 @@ t_active <- tibble(dates = as.character(),
                    category = character(), 
                    active = double())
 
+# for each team:
+# - apply case_when to each of their tickets
+# - for each active ticket return 1 to active column, otherwise 0
+# - sum add the count to their tickets then add to active table
 for(i in extract(date_seq)){
   t_active <- hpsaw %>% 
     select(category, status, create_date, solved_dt) %>% 
@@ -145,11 +141,9 @@ t <- ggplot(data = trend_by_day, aes(dates, value, group = count)) +
   geom_text(data = filter(trend_by_day,count == "active"), aes(label = value, y = value + 3), size = 3) +
   geom_point(data = filter(trend_by_day, count == "active"), size = 1.5, color = "grey39") +
   labs(x = "Week Begining", y = "Total", title = "Active Incidents Trend") +
-  theme_minimal() + 
-  theme(plot.title = element_text(hjust = 0.5)) +
-  guides(fill = guide_legend(title = "Legend"))
   
-
+  guides(fill = guide_legend(title = "Legend")) + 
+  theme(legend.position = "bottom")
 
 #------------------------------------------------------------------------------------------
 # Active Summaries
@@ -158,45 +152,40 @@ t <- ggplot(data = trend_by_day, aes(dates, value, group = count)) +
 # data for active summaries
 active_sum <- hpsaw %>% 
   select(category, priority, impact, incident_location_name, status, create_date) %>% 
-  filter(status == "Active", create_date >= "2017-07-22")  # <~ need to add create_date >= 2017-07-22
+  filter(status == "Active", create_date >= "2017-07-22")
 
-# Active incidents by priority
 by_priority <- ggplot(active_sum, aes(priority)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count',aes(label=..count..),vjust=-1) +
-  labs(x = "Priority", y = "Total", title = "Active Cases by Priority") + 
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "", y = "", title = "Active Cases by Priority") + 
+  
   ylim(0,15)
   
 
 # Active incidents by category
 by_category <- ggplot(active_sum, aes(category)) +
   geom_bar(aes(fill = priority)) + 
-  geom_text(stat = 'count', aes(label = ..count..), vjust=-1) +
-  labs(x = "Category", y = "Total", title = "Active Cases by Category") + 
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ggplot2::ylim(0,20)
+  geom_text(stat = 'count', aes(label = ..count..), hjust=-1) +
+  labs(x = "", y = "", title = "Active Cases by Category") + 
+  coord_flip() +
+  ylim(0, 6)
 
 # Active incidents by impact
 by_impact <- ggplot(active_sum, aes(impact)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count',aes(label=..count..),vjust=-1) + 
-  labs(x = "Impact", y = "Total", title = "Active Cases by Impact") + 
-  theme_minimal() + 
-  theme(plot.title = element_text(hjust = 0.5)) + 
-  ylim(0, 7)
+  labs(x = "", y = "", title = "Active Cases by Impact") + 
+  
+  ylim(0, 20)
+
+by_impact
 
 # Active incidents by location
 by_location <- ggplot(active_sum, aes(incident_location_name)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count', aes(label=..count..),hjust=-1) + 
-  labs(x = "", y = "Total", title = "Active Cases by Location") + 
-  coord_flip() +
-  theme_minimal() + 
-  theme(plot.title = element_text(hjust = 0.5)) 
+  labs(x = "", y = "", title = "Active Cases by Location") + 
+  coord_flip()  
 
 # Tidy environment
 rm(list=c("hpsaw_active_extract", "hpsaw_extract", "t_active", "t_closed", 

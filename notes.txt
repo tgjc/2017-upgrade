@@ -8,3 +8,10 @@ To Do:
 https://stackoverflow.com/questions/45114727/r-install-packages-error
 
 options(repos = getOption("repos")["CRAN"])
+
+Reports:
+hpsaw-active-extract
+Theo 2017 upgrade extract
+
+sr-active-extract
+sr-extract
