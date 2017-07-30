@@ -1,8 +1,12 @@
+---
+title: "EMR 2017 Version Upgrade"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
 
-#------------------------------------------------------------------------------------------
-# Set-up and read data
-#------------------------------------------------------------------------------------------
-
+```{r install libraries, include=FALSE}
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -10,7 +14,15 @@ library(magrittr)
 library(stringr)
 library(readxl)
 library(lubridate)
+library(rsconnect)
+```
+###Introduction
+The helpdesk tool used by our IT team is 
 
+### Read and preprocess data
+As the data was coming from a When reading in a new dataset first thing `col_clean` 
+
+```{r read and preprocess data}
 # Function to clean column names
 col_clean <- function(x){ 
   colnames(x) <- str_replace_all(colnames(x), " ", "_")
@@ -20,7 +32,7 @@ col_clean <- function(x){
 
 # Read data, clean col names and split creation time into date/time cols
 hpsaw_extract <- 
-  read_excel(path = "data/extract.xlsx",
+  read_excel(path = "~/2017-upgrade/data/extract.xlsx",
              sheet = "Incident List") %>%
   col_clean() %>% 
   select(id:title, priority, name_name,job_title:incident_location_name,
@@ -33,7 +45,7 @@ hpsaw_extract <-
          solved_tm = format(solved_time, '%H:%M:%S'))
 
 hpsaw_active_extract <- 
-  read_excel(path = "data/active-extract.xlsx",
+  read_excel(path = "~/2017-upgrade/data/active-extract.xlsx",
              sheet = "Incident List") %>%
   col_clean() %>% 
   select(id:title, priority, name_name,job_title:incident_location_name,
@@ -46,11 +58,10 @@ hpsaw_active_extract <-
 
 hpsaw <- bind_rows(hpsaw_active_extract, hpsaw_extract)
 
+```
 
-#------------------------------------------------------------------------------------------
-# create / closed / active trend
-#------------------------------------------------------------------------------------------
-
+### Create data for trend chart
+```{r data for trend}
 # Created incidents 
 t_created <- hpsaw %>% 
   select(create_date, category, solved_time) %>% 
@@ -63,10 +74,10 @@ t_created <- hpsaw %>%
 t_closed <- hpsaw %>% 
   select(category, solved_time) %>% 
   mutate(solved_dt = dmy(format(solved_time, '%d/%m/%Y')),
-         solved_tm = format(solved_time, '%H:%M:%S')) %>%  
+         solved_tm = format(solved_time, '%H:%M:%S')) %>%  # <~ redundant?
   group_by(category, solved_dt) %>% 
   summarise(closed = n()) %>%
-  ungroup() %>%                                            
+  ungroup() %>%                                            # <~ redundant?
   arrange(category, solved_dt) 
 
 
@@ -77,8 +88,8 @@ category_list <- hpsaw %>%
   extract2(1)
 
 # ask user for start end dates for table
-start_date <- ymd( readline(prompt = "Please enter start date of report (YYYY/MM/DD): ") )
-end_date <- ymd( readline(prompt = "Please enter end date of report (YYYY/MM/DD): ") )
+start_date <- ymd("2017/06/26")
+end_date <- ymd("2017/07/28")
 date_seq <- as_date(start_date:end_date)
 
 trend_tbl <- tibble( dates = rep(date_seq, times = length(category_list)),
@@ -128,6 +139,13 @@ trend_by_day <-
             active = sum(active)) %>% 
   gather(created, closed, active, key = count, value = value)
 
+# View table
+trend_by_day
+
+```
+
+### Trend plot
+```{r plot trend}
 # Plot trend created, closed + active trend line
 t <- ggplot(data = trend_by_day, aes(dates, value, group = count)) +
   geom_col(data = filter(trend_by_day, count != "active"), aes(fill = count), position_dodge(.6)) +
@@ -137,36 +155,49 @@ t <- ggplot(data = trend_by_day, aes(dates, value, group = count)) +
   geom_line(data = filter(trend_by_day, count == "active"), size = .75, color = "grey39") +
   geom_text(data = filter(trend_by_day,count == "active"), aes(label = value, y = value + 3), size = 3) +
   geom_point(data = filter(trend_by_day, count == "active"), size = 1.5, color = "grey39") +
-  labs(x = "Week Begining", y = "", title = "Active Incidents Trend") +
+  labs(x = "Week Begining", y = "Total", title = "Active Incidents Trend") +
+ 
   guides(fill = guide_legend(title = "Legend")) + 
   theme(legend.position = "bottom")
 
-#------------------------------------------------------------------------------------------
-# Active Summaries
-#------------------------------------------------------------------------------------------
+t
+```
 
+### Create data for active summaries
+```{r data for active summaries}
 # data for active summaries
 active_sum <- hpsaw %>% 
   select(category, priority, impact, incident_location_name, status, create_date) %>% 
   filter(status == "Active", create_date >= "2017-07-22")
-
+```
+### Plot of all active tickets since upgrade, sumamrised by priority
+```{r by_priority}
+# Active incidents by priority
 by_priority <- ggplot(active_sum, aes(priority)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count',aes(label=..count..),vjust=-1) +
   labs(x = "", y = "", title = "Active Cases by Priority") + 
   
   ylim(0,15)
-  
 
+by_priority
+```
+
+### Plot of all active tickets since upgrade, sumamrised by category 
+```{r by_category}
 # Active incidents by category
 by_category <- ggplot(active_sum, aes(category)) +
   geom_bar(aes(fill = priority)) + 
   geom_text(stat = 'count', aes(label = ..count..), hjust=-1) +
   labs(x = "", y = "", title = "Active Cases by Category") + 
   coord_flip() +
-  ylim(0, 5) +
-  theme(legend.position = "bottom")
+  ylim(0, 6)
 
+by_category
+```
+
+### Plot of all active tickets since upgrade, sumamrised by impact
+```{r by_impact}
 # Active incidents by impact
 by_impact <- ggplot(active_sum, aes(impact)) +
   geom_bar(fill = "royalblue") + 
@@ -176,18 +207,17 @@ by_impact <- ggplot(active_sum, aes(impact)) +
   ylim(0, 20)
 
 by_impact
+```
 
+### Plot of all active tickets since upgrade, sumamrised by location
+```{r by_location}
 # Active incidents by location
 by_location <- ggplot(active_sum, aes(incident_location_name)) +
   geom_bar(fill = "royalblue") + 
   geom_text(stat='count', aes(label=..count..),hjust=-1) + 
   labs(x = "", y = "", title = "Active Cases by Location") + 
-  coord_flip() +
-  ylim(0, 4)
+  coord_flip() 
 
-# Tidy environment
-rm(list=c("hpsaw_active_extract", "hpsaw_extract", "t_active", "t_closed", 
-          "t_created", "trend_tbl"))
+by_location
+```
 
-rm(list=c("category_list", "date_seq", "start_date", "end_date" , "i"))
-  

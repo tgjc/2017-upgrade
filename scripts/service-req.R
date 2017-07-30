@@ -37,9 +37,6 @@ sr_active_extract <-
          create_time = format(created_time, '%H:%M:%S'),
          solved_time = as.POSIXct(closed_time))
 
-## test for duplicates in report:
-## hpsaw <- semi_join(hpsaw_active_extract, hpsaw_extract, by = "id")
-
 sr_hpsaw <- bind_rows(sr_active_extract, sr_extract) %>% 
   rename(category = current_assignment_name)
 
@@ -130,9 +127,9 @@ sr_t <- ggplot(data = sr_trend_by_day, aes(dates, value, group = count)) +
   geom_text(data = filter(sr_trend_by_day,count == "active"), aes(label = value, y = value + 4), size = 3) +
   geom_point(data = filter(sr_trend_by_day, count == "active"), size = 1.5, color = "grey39") +
   labs(x = "Week Begining", y = "Total", title = "Active Service Requests Trend") +
-  theme_minimal() + 
   theme(plot.title = element_text(hjust = 0.5)) +
-  guides(fill = guide_legend(title = "Legend"))
+  guides(fill = guide_legend(title = "Legend")) +
+  theme(legend.position = "bottom")
 
 
 #------------------------------------------------------------------------------------------
