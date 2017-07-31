@@ -25,3 +25,9 @@ vignettes/*.pdf
 *.knit.md
 .Rproj.user
 packrat/lib*/
+# hpsaw extracts
+data/
+data/archive
+# Reports
+output/pivot
+output/reports/*.docx
